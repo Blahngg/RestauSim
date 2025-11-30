@@ -1,0 +1,84 @@
+<div>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('Update Inventory') }}
+        </h2>
+    </x-slot>
+
+    <form enctype="multipart/form-data" wire:submit.prevent="update" class="p-10">
+        <div class="flex flex-col items-center p-5 bg-white border border-gray-200 rounded-lg shadow-sm md:flex-row md:max-full dark:border-gray-700 dark:bg-gray-800">
+            <div class="flex items-center justify-center w-80">
+                <label for="image" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                    @if($image)
+                        <img src="{{ $image->temporaryURL() }}" alt="">
+                    @else
+                        <img src="{{ asset('storage/' . $storedImage) }}" alt="">
+                    @endif
+                    <input id="image" type="file" class="hidden"  wire:model="image"/>
+                </label>
+            </div> 
+            <div class="flex flex-col justify-between p-4 leading-normal w-full">
+                <div class="grid md:grid-cols-2 md:gap-6">
+                    
+                    <x-form.floating-input
+                        id="name"
+                        label="Name"
+                        type="text"
+                        wire:model="name"
+                    />
+                    <x-form.floating-input
+                        id="code"
+                        label="Code"
+                        type="text"
+                        wire:model="code"
+                    />
+                </div>
+                <div class="grid md:grid-cols-2 md:gap-6">
+                    <x-form.floating-input
+                        id="quantity"
+                        label="Quantity"
+                        type="number"
+                        wire:model="quantity"
+                    />
+                    <div class="relative z-0 w-full mb-5 group">
+                        <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="unit_of_measurement_id">
+
+                            <option>Unit</option>
+                            @foreach ($units as $unitIndex => $unit)
+                                <optgroup label="{{ Str::ucfirst($unitIndex) }}">
+                                    @foreach ($unit as $unitData)
+                                        <option value="{{ $unitData->id }}">{{ Str::ucfirst($unitData->name) }}</option>
+                                    @endforeach
+                                </optgroup>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="relative z-0 w-full mb-5 group">
+                    <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Category</label>
+                    <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="inventory_category_id">
+
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="grid md:grid-cols-2 md:gap-6">
+                    <x-form.floating-input
+                        id="price"
+                        label="Price"
+                        type="number"
+                        wire:model="price"
+                    />
+                    <x-form.floating-input
+                        id="par_level"
+                        label="Par Level"
+                        type="number"
+                        wire:model="par_level"
+                    />
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="w-full text-white bg-blue-700 mt-5 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+    </form>
+</div>

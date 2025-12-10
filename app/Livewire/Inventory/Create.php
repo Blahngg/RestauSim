@@ -46,13 +46,13 @@ class Create extends Component
     public function store(){
         $validated = $this->validate([
             'inventories.*.name' => 'required|string',
-            'inventories.*.code' => 'required|unique:inventories.code',
+            'inventories.*.code' => 'required|unique:inventories,code',
             'inventories.*.image' => 'required|image',
             'inventories.*.quantity' => 'required|numeric|gt:0',
             'inventories.*.price' => 'required|numeric|gt:0',
             'inventories.*.par_level' => 'required|numeric|gt:0',
-            'inventories.*.inventory_category_id' => 'required|exists:inventory_categories.id',
-            'inventories.*.unit_of_measurement_id' => 'required|exists:unit_of_measurements.id',
+            'inventories.*.inventory_category_id' => 'required|exists:inventory_categories,id',
+            'inventories.*.unit_of_measurement_id' => 'required|exists:unit_of_measurements,id',
         ]);
 
         DB::beginTransaction();

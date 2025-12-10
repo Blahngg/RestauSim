@@ -36,7 +36,6 @@ class InventoryList extends Component
         $this->deleteId = null;
     }
     public function deleteInventory(){
-        dd($this->deleteId);
         DB::beginTransaction();
         try{
             $inventory = Inventory::findOrFail($this->deleteId);

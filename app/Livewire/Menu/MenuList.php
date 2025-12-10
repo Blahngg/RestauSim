@@ -4,6 +4,8 @@ namespace App\Livewire\Menu;
 
 use App\Models\MenuItem;
 use App\Models\MenuItemCategory;
+use Exception;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -31,6 +33,18 @@ class MenuList extends Component
     public function closeDeleteModal(){
         $this->showDeleteModal = false;
         $this->deleteId = null;
+    }
+    public function deleteMenu(){
+        DB::beginTransaction();
+        try{
+            $menu = MenuItem::findOrFail($this->deleteId);
+            $menu->delete();
+            DB::commit();
+            $this->showDeleteModal = false;
+        }catch(Exception $e){
+            dd($e);
+            DB::rollBack();
+        }
     }
     public function render()
     {

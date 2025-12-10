@@ -11,6 +11,7 @@ use App\Models\MenuItemCustomization;
 use App\Models\UnitOfMeasurement;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -159,14 +160,21 @@ class MenuCreate extends Component
             'additionalIngredients.*.quantity' => 'required',
             'additionalIngredients.*.unit_of_measurement_id' => 'required|exists:unit_of_measurements,id',
         ]);
+
+        $uploadedImages = [];
+
         DB::beginTransaction();
         // Doesn't have lines to store images to local storage
         try{
+
+            $uploadedImage = $this->image->store('menu_images', 'public');
+            $uploadedImages[] = $uploadedImage;
+
             // INSERT MENU ITEM
             $menu_item = MenuItem::create([
                 'name' => $this->name,
                 'description' => $this->description,
-                'image' => $this->image,
+                'image' => $uploadedImage,
                 'price' => $this->price,
                 'menu_item_category_id' => $this->menu_item_category_id
             ]);
@@ -201,12 +209,12 @@ class MenuCreate extends Component
                 }
             }
             // INSERT ADDITIONAL INGREDIENTS
-            foreach($this->additionalIngredients as $additonlIngredient){
+            foreach($this->additionalIngredients as $additionalIngredient){
                 MenuItemCustomization::create([
                     'menu_item_id' => $menu_item->id,
-                    'inventory_id' => $additonlIngredient['inventory_id'],
-                    'quantity' => $additonlIngredient['quantity'],
-                    'unit_of_measurement_id' => $additonlIngredient['unit_of_measurement_id'],
+                    'inventory_id' => $additionalIngredient['inventory_id'],
+                    'quantity' => $additionalIngredient['quantity'],
+                    'unit_of_measurement_id' => $additionalIngredient['unit_of_measurement_id'],
                     'action' => 'add'
                 ]);
             }
@@ -214,6 +222,9 @@ class MenuCreate extends Component
             $this->reset('name', 'description', 'image', 'price', 'menu_item_category_id', 'ingredients', 'alternativeIngredients', 'removableIngredients', 'additionalIngredients');
         }catch(Exception $e){
             DB::rollBack();
+            foreach($uploadedImages as $image){
+                Storage::disk('public')->delete($image);
+            }
             dd($e);
         }
     }

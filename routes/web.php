@@ -1,11 +1,15 @@
 <?php
 
+use App\Http\Controllers\FloorPlanController;
+use App\Livewire\FloorPlan\ViewFloorPlan;
 use App\Livewire\Inventory\Create;
 use App\Livewire\Inventory\InventoryEdit;
 use App\Livewire\Inventory\InventoryList;
 use App\Livewire\Inventory\InventoryRestock;
 use App\Livewire\Menu\MenuCreate;
+use App\Livewire\Menu\MenuEdit;
 use App\Livewire\Menu\MenuList;
+use App\Livewire\Order\Create as OrderCreate;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
@@ -44,6 +48,31 @@ Route::prefix('menu')
 
         Route::get('/', MenuList::class)
             ->name('menu.index');
+
+        Route::get('/{menu}/edit', MenuEdit::class)
+            ->name('menu.edit');
+    });
+
+Route::prefix('floorplan')
+    ->middleware(['auth'])
+    ->group(function(){
+
+        Route::get('/', ViewFloorPlan::class)
+            ->name('floorplan.index');
+
+        Route::get('create', [FloorPlanController::class, 'create'])
+            ->name('floorplan.create');
+        
+        Route::post('store', [FloorPlanController::class, 'store'])
+            ->name('floorplan.store');
+    });
+
+Route::prefix('order')
+    ->middleware(['auth'])
+    ->group(function(){
+
+        Route::get('/{table}/create', OrderCreate::class)
+            ->name('order.create');
     });
 
 require __DIR__.'/auth.php';

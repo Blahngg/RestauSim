@@ -42,6 +42,9 @@ new class extends Component
                     <x-nav-link :href="route('floorplan.index')" :active="request()->routeIs('floorplan.*')" wire:navigate>
                         {{ __('Floor Plan') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('kitchen.dashboard')" :active="request()->routeIs('kitchen.*')" wire:navigate>
+                        {{ __('Kitchen') }}
+                    </x-nav-link>
                     
                 </div>
             </div>

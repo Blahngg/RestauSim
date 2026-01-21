@@ -6,6 +6,7 @@ use App\Livewire\Inventory\Create;
 use App\Livewire\Inventory\InventoryEdit;
 use App\Livewire\Inventory\InventoryList;
 use App\Livewire\Inventory\InventoryRestock;
+use App\Livewire\Kitchen\KitchenDashboard;
 use App\Livewire\Menu\MenuCreate;
 use App\Livewire\Menu\MenuEdit;
 use App\Livewire\Menu\MenuList;
@@ -68,11 +69,15 @@ Route::prefix('floorplan')
     });
 
 Route::prefix('order')
-    ->middleware(['auth'])
+    ->middleware(['auth', 'web'])
     ->group(function(){
 
         Route::get('/{table}/create', OrderCreate::class)
             ->name('order.create');
     });
+
+Route::get('kitchen', KitchenDashboard::class)
+    ->middleware(['auth', 'web'])
+    ->name('kitchen.dashboard');
 
 require __DIR__.'/auth.php';

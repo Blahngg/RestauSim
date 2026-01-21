@@ -9,6 +9,7 @@ class ItemOrder extends Model
     protected $fillable = [
         'order_id', 
         'menu_item_id', 
+        'status',
         'quantity', 
     ];
 

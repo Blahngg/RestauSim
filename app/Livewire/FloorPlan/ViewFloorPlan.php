@@ -14,7 +14,7 @@ class ViewFloorPlan extends Component
     public $currentTable;
     public $showSideBar = false;
     public function mount(){
-        $this->floorplan = FloorPlan::findOrFail(4);
+        $this->floorplan = FloorPlan::findOrFail(1);
         $this->tables = $this->floorplan->tables->keyBy('svg_id');
     }
     public function toggleTable($svgId){

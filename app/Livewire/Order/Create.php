@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Order;
 
+use App\Events\OrderCancelled;
+use App\Events\OrderSaved;
 use App\Models\ItemOrder;
 use App\Models\ItemOrderCustomization;
 use App\Models\MenuItem;
@@ -37,29 +39,33 @@ class Create extends Component
             $this->order = $orders->first();
             // initialize existing order items
             foreach($this->order->items as $item){
-                $customizations = [];
-                // get existing customizations
-                foreach($item->customizations as $customization){
-                    if($item->id === $customization->item_order_id){
-                        $customizations[] = [
-                            'id' => $customization->customization->id,
-                            'name' => $customization->customization->inventory->name ?? 'No ' . $customization->customization->ingredient->inventory->name,
-                            'quantity' => $customization->quantity
-                        ];
+                if($item->status !== 'cancelled'){
+                    $customizations = [];
+                    // get existing customizations
+                    foreach($item->customizations as $customization){
+                        if($item->id === $customization->item_order_id){
+                            $customizations[] = [
+                                'id' => $customization->customization->id,
+                                'name' => $customization->customization->inventory->name ?? 'No ' . $customization->customization->ingredient->inventory->name,
+                                'quantity' => $customization->quantity
+                            ];
+                        }
                     }
+    
+                    $this->orders[] = [
+                        'uid' => $item->id,
+                        'menu_item_id' => $item->menu_item_id,
+                        'menu_name' => $item->item->name,
+                        'customizations' => $customizations, 
+                        'quantity' =>  $item->quantity
+                    ];
                 }
-
-                $this->orders[] = [
-                    'uid' => $item->id,
-                    'menu_item_id' => $item->menu_item_id,
-                    'menu_name' => $item->item->name,
-                    'customizations' => $customizations, 
-                    'quantity' =>  $item->quantity
-                ];
             }
         }
         elseif($orders->isEmpty()){
-            dd('No Order');
+            $this->order = Order::create([
+                'table_id' => $this->table->id
+            ]);
         }
         else{
             dd('Error: there are two existing orders for this table');
@@ -146,10 +152,6 @@ class Create extends Component
         try{
             $existingIds = [];
 
-            //create order
-            $this->order = $this->order ?? Order::create([
-                'table_id' => $this->table->id
-            ]);
             $order = $this->order;
 
             //Differentiate existing order items and not
@@ -157,20 +159,37 @@ class Create extends Component
             //create item orders ( for loop)
             foreach($this->orders as $itemOrder){
                 if(!ItemOrder::where('id', $itemOrder['uid'])->exists()){
-                    $savedItemOrder = ItemOrder::create([
+                    $ItemOrder = ItemOrder::create([
                         'order_id' => $order->id,
                         'menu_item_id' => $itemOrder['menu_item_id'],
+                        'status' => 'pending',
                         'quantity' => $itemOrder['quantity']
                     ]);
-                    $existingIds[] = $savedItemOrder->id;
+                    $existingIds[] = $ItemOrder->id;
                     // create item order customizations ( for loop)
                     foreach($itemOrder['customizations'] as $customization){
                         ItemOrderCustomization::create([
-                            'item_order_id' => $savedItemOrder->id,
+                            'item_order_id' => $ItemOrder->id,
                             'menu_item_customization_id' => $customization['id'],
                             'quantity' => $customization['quantity'] ?: 1
                         ]);
                     }
+
+                    event(new OrderSaved(
+                        $ItemOrder->load(
+                            // table code
+                            'order.table:id,table_code',
+                            // menu item name
+                            'item:id,name',
+                            // item order customizations
+                            'customizations:id,item_order_id,menu_item_customization_id,quantity',
+                            // menu customizations
+                            'customizations.customization:id,ingredient_id,inventory_id,action',
+                            // inventory
+                            'customizations.customization.ingredient.inventory:id,name',
+                            'customizations.customization.inventory:id,name',
+                        )
+                    ));
                 }
                 else{
                     $existingIds[] = $itemOrder['uid'];
@@ -178,7 +197,16 @@ class Create extends Component
             }
             $databaseIds = ItemOrder::where('order_id', $order->id)->pluck('id')->toArray();
             $missingIds = array_diff($databaseIds, $existingIds);
-            ItemOrder::whereIn('id', $missingIds)->delete();
+
+            $itemsToUpdate = ItemOrder::whereIn('id', $missingIds)
+                ->where('status', '!=', 'cancelled')
+                ->get();
+            foreach($itemsToUpdate as $item){
+                $item->update(['status' => 'cancelled']);
+
+                event(new OrderCancelled($item->id, $this->table->table_code));
+            }
+
             DB::commit();
         }catch(Exception $e){
             DB::rollBack();
@@ -200,4 +228,8 @@ class Create extends Component
         return view('livewire.order.create')
             ->with(compact('active', 'categories', 'menuItems'));
     }
+
+    // add status to item orders for tracking whether the item is order pending, preparing, completed, or cancled(maybe)
+    // add price computation for saved orders
+    //
 }

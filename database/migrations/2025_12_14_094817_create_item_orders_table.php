@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
             $table->foreignId('menu_item_id')->constrained('menu_items');
+            $table->enum('status', ['pending', 'preparing', 'completed', 'cancelled'])->default('pending');
             $table->integer('quantity');
             $table->timestamps();
         });

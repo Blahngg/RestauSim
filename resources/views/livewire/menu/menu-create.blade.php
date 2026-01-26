@@ -30,6 +30,14 @@
                     <div class="flex flex-col justify-between p-4 leading-normal w-full">
                         <div class="relative z-0 w-1/2 mb-5 group">
                             <x-form.floating-input
+                                id="code"
+                                label="Code"
+                                type="text"
+                                wire:model="code"
+                            />
+                        </div>
+                        <div class="relative z-0 w-1/2 mb-5 group">
+                            <x-form.floating-input
                                 id="name"
                                 label="Name"
                                 type="text"
@@ -53,10 +61,25 @@
                         <div class="relative z-0 w-1/2 mb-5 group">
                             <x-form.floating-input
                                 id="price"
-                                label="Price"
+                                label="Base Price"
                                 type="number"
-                                wire:model="price"
+                                wire:model="base_price"
                             />
+                        </div>
+                        <div class="relative z-0 w-1/2 mb-5 group grid grid-cols-2 gap-10">
+                            <x-form.floating-input
+                                id="price"
+                                label="Value Added Tax Rate"
+                                type="number"
+                                step="any"
+                                wire:model="vat_rate"
+                            />
+
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" value="true" class="sr-only peer" wire:model="is_vat_inclusive">
+                                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"></div>
+                                <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">VAT Inclusive</span>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -73,6 +96,7 @@
             <ul class="w-full divide-y-8 divide-double">
                 @foreach ($ingredients as $index => $ingredient)
                     <li class="pb-3 sm:pb-4">
+                        {{-- MAIN INGREDIENTS --}}
                         <div>
                             <h4 class="text-2xl font-bold text-heading dark:text-white my-3">Ingridient {{ $index + 1 }}</h4>
                             <div class="flex items-center space-x-4 rtl:space-x-reverse">
@@ -91,7 +115,7 @@
                                     <label for="removable-{{ $index }}" class="inline-flex items-center mb-5 cursor-pointer">
                                         <input id="removable-{{ $index }}" type="checkbox" wire:model="removableIngredients" value="{{ $ingredient['uid'] }}" class="sr-only peer">
                                         <div class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-soft dark:peer-focus:ring-brand-soft rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-buffer after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-900"></div>
-                                        <span class="select-none ms-3 text-sm font-medium text-heading">Large toggle</span>
+                                        <span class="select-none ms-3 text-sm font-medium text-heading">Removable</span>
                                     </label>
                                 </div>
                                 <div class="inline-flex items-center align-middle text-base font-semibold text-heading">
@@ -162,6 +186,7 @@
                                 </div>
                             </div>
                         </div>
+                        {{-- ALTERNATIVE INGREDIENTS --}}
                         <div class=" border-t-2">
                             <h4 class="text-2xl font-bold dark:text-white my-4">Alternative Ingredients</h4>
                             <ul class="w-full divide-y divide-default">
@@ -183,7 +208,18 @@
                                                     </div>
                                                     <div class="inline-flex items-center align-middle text-base font-semibold text-heading">
                                                         <div class="flex flex-col items-center align-middle text-gray-400">
-                                                            <label for="quantity-input" class="block mb-2.5 text-sm font-medium text-heading">Choose quantity:</label>
+                                                            <label for="number-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter price difference:</label>
+                                                            <input type="number" 
+                                                                id="number-input" 
+                                                                aria-describedby="helper-text-explanation" 
+                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                                                                placeholder="123 or -123" 
+                                                                wire:model="alternativeIngredients.{{ $alternativeIndex }}.price"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="inline-flex items-center align-middle text-base font-semibold text-heading">
+                                                        <div class="flex flex-col items-center align-middle text-gray-400">
+                                                            {{-- <label for="quantity-input" class="block mb-2.5 text-sm font-medium text-heading">Choose quantity:</label>
                                                             <div class="relative flex items-center max-w-[9rem] shadow-xs rounded-xl">
                                                                 <button type="button" 
                                                                     id="decrement-button" 
@@ -204,7 +240,13 @@
                                                                     wire:click="incrementQuantity({{ $alternativeIndex }}, 'alternative')">
                                                                         <svg class="w-4 h-4 text-heading" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/></svg>
                                                                 </button>
-                                                            </div>
+                                                            </div> --}}
+                                                            <label for="number-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+                                                            <input type="number" 
+                                                                id="number-input" 
+                                                                aria-describedby="helper-text-explanation" 
+                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                                                                wire:model="alternativeIngredients.{{ $alternativeIndex }}.quantity"/>
                                                         </div>
                                                     </div>
                                                     <div class="relative z-0 group">
@@ -220,7 +262,7 @@
                                                             @endforeach
                                                         </select>
                                                     </div>
-                                                    <div class="flex flex-col">
+                                                    <div class="flex flex-col justify-center align-middle">
                                                         <button type="button" 
                                                             class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
                                                             wire:click="removeIngredient('base', '{{ $ingredient['uid'] }}', '{{ $alternativeIngredient['uid'] }}')">
@@ -265,7 +307,18 @@
                                 </div>
                                 <div class="inline-flex items-center align-middle text-base font-semibold text-heading">
                                     <div class="flex flex-col items-center align-middle text-gray-400">
-                                        <label for="quantity-input" class="block mb-2.5 text-sm font-medium text-heading">Choose quantity:</label>
+                                        <label for="number-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter price difference:</label>
+                                        <input type="number" 
+                                            id="number-input" 
+                                            aria-describedby="helper-text-explanation" 
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                                            placeholder="123 or -123" 
+                                            wire:model="additionalIngredients.{{ $additionalIndex }}.price"/>
+                                    </div>
+                                </div>
+                                <div class="inline-flex items-center align-middle text-base font-semibold text-heading">
+                                    <div class="flex flex-col items-center align-middle text-gray-400">
+                                        {{-- <label for="quantity-input" class="block mb-2.5 text-sm font-medium text-heading">Choose quantity:</label>
                                         <div class="relative flex items-center max-w-[9rem] shadow-xs rounded-xl">
                                             <button type="button" 
                                                 id="decrement-button" 
@@ -301,7 +354,13 @@
                                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
                                                     </svg>
                                             </button>
-                                        </div>
+                                        </div> --}}
+                                        <label for="number-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Quantity</label>
+                                        <input type="number" 
+                                            id="number-input" 
+                                            aria-describedby="helper-text-explanation" 
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                                            wire:model="additionalIngredients.{{ $additionalIndex }}.quantity"/>
                                     </div>
                                 </div>
                                 <div class="relative z-0 group">
@@ -342,9 +401,9 @@
 
     @if ($showInventoryModal)
         <div id="large-modal" tabindex="-1" class="fixed flex justify-center top-0 left-0 right-0 z-50 w-full p-20 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full cursor-grab select-none scroll-smooth">
-            <div class="relative w-full max-w-4xl max-h-full">
+            <div class="relative w-full max-w-4xl max-h-full border border-white rounded-lg">
                 <!-- Modal content -->
-                <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-800">
+                <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-800 h-full">
                     <!-- Modal header -->
                     <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
                         <h3 class="text-xl font-medium text-gray-900 dark:text-white">
@@ -361,6 +420,7 @@
                     </div>
                     <!-- Modal body -->
                     <div class="p-4 md:p-5 space-y-4">
+                        {{-- TABS --}}
                         <ul class="dragscroll whitespace-nowrap flex overflow-x-scroll text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400">
                             <li class="me-2">
                                 <div 
@@ -381,9 +441,9 @@
                                 </li>
                             @endforeach
                         </ul>
-                        <div class="flex mb-2">
+                        <div class="mb-2 grid grid-cols-7 gap-3">
                             @foreach ($inventories as $inventory)
-                                <div class="mr-3 cursor-pointer" 
+                                <div class="cursor-pointer" 
                                     wire:key="inventory-{{ $inventory->id }}"
                                     wire:click="addIngredient({{ $inventory->id }})">
                                         <div class="w-28 bg-white rounded-md shadow-sm dark:bg-gray-800 flex flex-col overflow-hidden border-gray-200 dark:border-gray-700 border">

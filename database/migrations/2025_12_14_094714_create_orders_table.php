@@ -13,9 +13,15 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('table_id')->constrained('tables');
+            $table->string('code')->unique();
+            $table->foreignId('table_id')->constrained('tables')->nullable();
             $table->enum('type', ['standard', 'priority', 'take-out'])->default('standard');
-            $table->enum('status', ['preparing', 'completed'])->default('preparing');
+            $table->enum('status', ['preparing', 'completed', 'cancelled'])->default('preparing');
+            $table->decimal('subtotal', 8,2); // 
+            $table->decimal('service_charge', 8,2); //
+            $table->decimal('discount_total', 8,2); //
+            $table->decimal('vat_total', 8,2); //
+            $table->decimal('grand_total', 8,2); //
             $table->timestamps();
         });
     }

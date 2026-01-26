@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('menu_items', function (Blueprint $table) {
             $table->id();
+            $table->string('code')->unique();
             $table->string('name');
             $table->string('description');
             $table->string('image');
-            $table->float('price');
+            $table->decimal('base_price', 8, 2);
+            $table->decimal('vat_rate', 8, 2)->default(0.12);
+            $table->boolean('is_vat_inclusive');
             $table->foreignId('menu_item_category_id')->constrained('menu_item_categories');
             $table->timestamps();
         });

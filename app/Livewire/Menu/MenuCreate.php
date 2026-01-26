@@ -22,10 +22,13 @@ use PDO;
 class MenuCreate extends Component
 {
     use WithFileUploads;
+    public $code;
     public $name;
     public $description;
     public $image;
-    public $price;
+    public $base_price;
+    public $vat_rate = 0.12;
+    public $is_vat_inclusive = false;
     public $menu_item_category_id;
     public $ingredients = [];
     public $alternativeIngredients = [];
@@ -83,6 +86,7 @@ class MenuCreate extends Component
                     'unit_of_measurement_id' => $inventory->unit_of_measurement_id,
                     'unit_category' => $inventory->unitOfMeasurement->category,
                     'quantity' => 0,
+                    'price' => null,
                 ];
             }
         }
@@ -98,6 +102,7 @@ class MenuCreate extends Component
                     'unit_of_measurement_id' => $inventory->unit_of_measurement_id,
                     'unit_category' => $inventory->unitOfMeasurement->category,
                     'quantity' => 0,
+                    'price' => null,
                 ];
         }
     }
@@ -146,18 +151,23 @@ class MenuCreate extends Component
     public function save(){
         $validated = $this->validate([
             'image' => 'required|image',
+            'code' => 'required|unique:menu_items,code',
             'name' => 'required',
             'description' => 'nullable',
-            'price' => 'required|numeric|gte:0',
+            'base_price' => 'required|numeric|gte:0',
+            'vat_rate' => 'decimal:2',
+            'is_vat_inclusive' => 'boolean',
             'menu_item_category_id'=> 'required|exists:menu_item_categories,id',
             'ingredients.*.inventory_id' => 'required|exists:inventories,id',
             'ingredients.*.quantity' => 'required|numeric|gt:0',
             'ingredients.*.unit_of_measurement_id' => 'required|exists:unit_of_measurements,id',
             'alternativeIngredients.*.inventory_id' => 'required|exists:inventories,id',
             'alternativeIngredients.*.quantity' => 'required',
+            'alternativeIngredients.*.price' => 'nullable|integer',
             'alternativeIngredients.*.unit_of_measurement_id' => 'required|exists:unit_of_measurements,id',
             'additionalIngredients.*.inventory_id' => 'required|exists:inventories,id',
             'additionalIngredients.*.quantity' => 'required',
+            'additionalIngredients.*.price' => 'nullable|integer',
             'additionalIngredients.*.unit_of_measurement_id' => 'required|exists:unit_of_measurements,id',
         ]);
 
@@ -172,11 +182,14 @@ class MenuCreate extends Component
 
             // INSERT MENU ITEM
             $menu_item = MenuItem::create([
+                'code' => $this->code,
                 'name' => $this->name,
                 'description' => $this->description,
                 'image' => $uploadedImage,
-                'price' => $this->price,
-                'menu_item_category_id' => $this->menu_item_category_id
+                'base_price' => $this->base_price,
+                'menu_item_category_id' => $this->menu_item_category_id,
+                'vat_rate' => $this->vat_rate,
+                'is_vat_inclusive' => $this->is_vat_inclusive,
             ]);
 
             foreach($this->ingredients as $ingredient){
@@ -196,7 +209,8 @@ class MenuCreate extends Component
                             'inventory_id' => $alternativeIngredient['inventory_id'],
                             'quantity' => $alternativeIngredient['quantity'],
                             'unit_of_measurement_id' => $alternativeIngredient['unit_of_measurement_id'],
-                            'action' => 'replace'
+                            'action' => 'replace',
+                            'price' => $alternativeIngredient['price'],
                         ]);
                     }
                 }
@@ -215,11 +229,12 @@ class MenuCreate extends Component
                     'inventory_id' => $additionalIngredient['inventory_id'],
                     'quantity' => $additionalIngredient['quantity'],
                     'unit_of_measurement_id' => $additionalIngredient['unit_of_measurement_id'],
-                    'action' => 'add'
+                    'action' => 'add',
+                    'price' => $additionalIngredient['price'],
                 ]);
             }
             DB::commit();
-            $this->reset('name', 'description', 'image', 'price', 'menu_item_category_id', 'ingredients', 'alternativeIngredients', 'removableIngredients', 'additionalIngredients');
+            $this->reset('code', 'name', 'description', 'image', 'base_price', 'menu_item_category_id', 'vat_rate', 'is_vat_inclusive', 'ingredients', 'alternativeIngredients', 'removableIngredients', 'additionalIngredients');
         }catch(Exception $e){
             DB::rollBack();
             foreach($uploadedImages as $image){

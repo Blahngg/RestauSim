@@ -15,8 +15,16 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
             $table->foreignId('menu_item_id')->constrained('menu_items');
-            $table->enum('status', ['pending', 'preparing', 'completed', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'preparing', 'completed', 'served', 'cancelled'])->default('pending');
+            $table->enum('customer_type', ['regular', 'senior', 'pwd'])->default('regular');
             $table->integer('quantity');
+            $table->decimal('unit_price', 8, 2);
+            $table->enum('discount_type', ['percent', 'fixed'])->nullable();
+            $table->decimal('discount_value', 8, 2);
+            $table->decimal('discount_amount', 8, 2);
+            $table->decimal('vat_rate', 8, 2);
+            $table->decimal('subtotal', 8, 2);
+            $table->decimal('total', 8, 2);
             $table->timestamps();
         });
     }

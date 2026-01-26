@@ -12,6 +12,7 @@ class MenuItemCustomization extends Model
         'inventory_id',
         'name',
         'quantity', 
+        'price', 
         'unit_of_measurement_id',
         'action'
     ];

@@ -17,7 +17,8 @@ return new class extends Migration
             $table->foreignId('ingredient_id')->nullable()->constrained('ingredients')->onDelete('set null');
             $table->foreignId('inventory_id')->nullable()->constrained('inventories')->onDelete('set null');
             $table->string('name')->nullable();
-            $table->float('quantity')->nullable();
+            $table->decimal('quantity', 8, 2)->nullable();
+            $table->decimal('price', 8, 2)->nullable(); //
             $table->foreignId('unit_of_measurement_id')->nullable()->constrained('unit_of_measurements')->onDelete('set null');
             $table->string('action');
             $table->timestamps();

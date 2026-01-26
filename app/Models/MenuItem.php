@@ -7,10 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class MenuItem extends Model
 {
     protected $fillable = [
+        'code',
         'name', 
         'description', 
-        'price', 
+        'base_price', 
         'image', 
+        'vat_rate',
+        'is_vat_inclusive',
         'menu_item_category_id'
     ];
 

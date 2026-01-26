@@ -36,4 +36,24 @@ class ItemOrder extends Model
             'id'
         );
     }
+
+    public function calculateUnitPrice(){
+        $basePrice = $this->item->price;
+
+        $quantity = $this->item->quantity;
+        
+        $customizationTotal = $this->customizations->sum(
+            fn ($custom) => $custom->customization->price * $custom->quantity
+        );
+
+        return $$basePrice + $customizationTotal;
+    }
+
+    public function calculateTotalPrice(){
+        return $this->calculateUnitPrice() * $this->quantity;
+    }
+
+    public function getComputedPrice(){
+        return $this->calculateTotalPrice();
+    }
 }

@@ -85,6 +85,11 @@ class UnitOfMeasurementSeeder extends Seeder
                 'symbol' => 'gal',
                 'category' => 'volume'
             ],
+            [
+                'name' => 'piece',
+                'symbol' => 'pc',
+                'category' => 'count'
+            ],
         ];
 
         foreach($units as $unit){

@@ -5,6 +5,14 @@
         </h2>
     </x-slot>
 
+    @if($errors->any())
+        <ul class="text-white">
+            @foreach ($errors->all() as $message)
+                <li>{{ $message }}</li>            
+            @endforeach
+        </ul>
+    @endif
+
     <form enctype="multipart/form-data" wire:submit.prevent="update" class="p-10">
         <div class="flex flex-col items-center p-5 bg-white border border-gray-200 rounded-lg shadow-sm md:flex-row md:max-full dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center justify-center w-80">
@@ -18,64 +26,78 @@
                 </label>
             </div> 
             <div class="flex flex-col justify-between p-4 leading-normal w-full">
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    
-                    <x-form.floating-input
-                        id="name"
-                        label="Name"
-                        type="text"
-                        wire:model="name"
-                    />
-                    <x-form.floating-input
-                        id="code"
-                        label="Code"
-                        type="text"
-                        wire:model="code"
-                    />
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <x-form.floating-input
-                        id="quantity"
-                        label="Quantity"
-                        type="number"
-                        wire:model="quantity"
-                    />
-                    <div class="relative z-0 w-full mb-5 group">
-                        <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="unit_of_measurement_id">
+                <div class="mb-3">
+                    <h5 class="text-xl font-bold dark:text-white mb-3">Basic Information</h5>
+                    <div class="grid md:grid-cols-2 md:gap-3">
+                        
+                        <x-form.floating-input
+                            id="code"
+                            label="Code"
+                            type="text"
+                            wire:model="code"
+                        />
 
-                            <option>Unit</option>
-                            @foreach ($units as $unitIndex => $unit)
-                                <optgroup label="{{ Str::ucfirst($unitIndex) }}">
-                                    @foreach ($unit as $unitData)
-                                        <option value="{{ $unitData->id }}">{{ Str::ucfirst($unitData->name) }}</option>
-                                    @endforeach
-                                </optgroup>
-                            @endforeach
-                        </select>
+                        <x-form.floating-input
+                            id="name"
+                            label="Name"
+                            type="text"
+                            wire:model="name"
+                        />
+
+                        <div class="relative z-0 w-full mb-5 group">
+                            <select id="inventory_unit" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model.live="inventory_unit_id">
+    
+                                <option value="">Inventory Unit</option>
+                                @foreach ($units as $unitData)
+                                    <option value="{{ $unitData->id }}">{{ Str::ucfirst($unitData->name) }} ({{ $unitData->symbol }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h5 class="text-xl font-bold dark:text-white mb-3">Cost Information</h5>
+                    <div class="grid md:grid-cols-2 md:gap-3">
+                        
+                        <x-form.floating-input
+                            id="cost"
+                            label="Unit Cost"
+                            type="number"
+                            wire:model="unit_cost"
+                        />
+
+                        <div class="relative z-0 w-full mb-5 group">
+                            <select id="cost_unit" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="cost_unit_id">
+    
+                                <option value="">Cost Unit</option>
+                                @foreach ($filteredUnits as $filteredUnit)
+                                    <option value="{{ $filteredUnit->id }}">{{ Str::ucfirst($filteredUnit->name) }} ({{ $filteredUnit->symbol }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h5 class="text-xl font-bold dark:text-white mb-3">Stock Information</h5>
+                    <div class="grid md:grid-cols-2 md:gap-3">
+                        
+                        <x-form.floating-input
+                            id="par_level"
+                            label="Par Level"
+                            type="number"
+                            wire:model="par_level"
+                        />
                     </div>
                 </div>
                 <div class="relative z-0 w-full mb-5 group">
-                    <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Category</label>
-                    <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="inventory_category_id">
+                    <label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Category</label>
+                    <select id="category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="inventory_category_id">
 
+                        <option value="">Select Category</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}">{{ $category->name }}</option>
                         @endforeach
                     </select>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <x-form.floating-input
-                        id="price"
-                        label="Price"
-                        type="number"
-                        wire:model="price"
-                    />
-                    <x-form.floating-input
-                        id="par_level"
-                        label="Par Level"
-                        type="number"
-                        wire:model="par_level"
-                    />
                 </div>
             </div>
         </div>

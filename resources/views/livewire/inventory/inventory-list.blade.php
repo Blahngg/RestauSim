@@ -5,6 +5,7 @@
         </h2>
     </x-slot>
 
+    {{-- Action Buttons --}}
     <div class="pt-10 px-10">
         <a href="{{ route('inventory.create') }}">
             <button type="button"
@@ -21,6 +22,7 @@
     </div>
 
     <div class="p-10">
+        {{-- Category Tabs --}}
         <ul class="flex flex-wrap justify-center text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400">
             <li class="me-2">
                 <div 
@@ -41,16 +43,18 @@
                 </li>
             @endforeach
         </ul>
+        {{-- Data --}}
         <div class="relative overflow-x-auto shadow-md sm:rounded-lg p-8">
             @if (!$inventories->isEmpty())
                 <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
                             <th scope="col" class="p-4">
-                                <div class="flex items-center">
+                                {{-- <div class="flex items-center">
                                     <input id="checkbox-all" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                                     <label for="checkbox-all" class="sr-only">checkbox</label>
-                                </div>
+                                </div> --}}
+                                #
                             </th>
                             <th scope="col" class="px-16 py-3">
                                 <span class="sr-only">Image</span>
@@ -62,7 +66,10 @@
                                 Code
                             </th>
                             <th scope="col" class="px-6 py-3">
-                                Qty
+                                Quantity On Hand
+                            </th>
+                            <th scope="col" class="px-6 py-3">
+                                Cost
                             </th>
                             <th scope="col" class="px-6 py-3">
                                 Action
@@ -70,13 +77,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($inventories as $inventory)
+                        @foreach ($inventories as $index => $inventory)
                             <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-900">
                                 <td class="w-4 p-4">
-                                    <div class="flex items-center">
+                                    {{-- <div class="flex items-center">
                                         <input id="checkbox-table-1" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                                         <label for="checkbox-table-1" class="sr-only">checkbox</label>
-                                    </div>
+                                    </div> --}}
+                                    {{ ++$index }}
                                 </td>
                                 <td class="p-4">
                                     <img src="{{ asset('storage/' . $inventory->image) }}" class="w-16 md:w-32 max-w-full max-h-full" alt="Apple Watch">
@@ -88,7 +96,10 @@
                                     {{ $inventory->code }}
                                 </td>
                                 <td class="px-6 py-4">
-                                    {{ $inventory->quantity }} {{ $inventory->unitOfMeasurement->symbol }}
+                                    {{ $inventory->quantity_on_hand }} {{ $inventory->inventoryUnit->symbol }}s
+                                </td>
+                                <td class="px-6 py-4">
+                                    {{ $inventory->cost_per_unit }}
                                 </td>
                                 <td class="px-6 py-4">
                                     <a href="{{ route('inventory.edit', $inventory) }}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline cursor-pointer pr-5"

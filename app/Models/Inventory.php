@@ -10,12 +10,22 @@ class Inventory extends Model
         'name',
         'code',
         'image',
-        'quantity',
-        'price',
+        'opening_quantity',
+        'quantity_on_hand',
+        'unit_cost',
         'par_level',
         'inventory_category_id',
-        'unit_of_measurement_id',
+        'inventory_unit_id',
+        'cost_unit_id',
     ];
+
+    protected $appends = [
+        'cost_per_unit'
+    ];
+
+    public function getCostPerUnitAttribute(){
+        return $this->unit_cost . '/' . $this->costUnit->symbol;
+    }
 
     public function category(){
         return $this->belongsTo(
@@ -25,10 +35,17 @@ class Inventory extends Model
         );
     }
 
-    public function unitOfMeasurement(){
+    public function inventoryUnit(){
         return $this->belongsTo(
             UnitOfMeasurement::class,
-            'unit_of_measurement_id',
+            'inventory_unit_id',
+            'id'
+        );
+    }
+    public function costUnit(){
+        return $this->belongsTo(
+            UnitOfMeasurement::class,
+            'cost_unit_id',
             'id'
         );
     }

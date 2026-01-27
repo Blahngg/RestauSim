@@ -13,14 +13,14 @@
         </ul>
     @endif
 
-    <button 
+    {{-- <button 
         type="button" 
         class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-5 mt-5 ml-5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
         wire:click="add()">
             Add
-    </button>
+    </button> --}}
     <form wire:submit.prevent="store" enctype="multipart/form-data" class="p-5">
-        @foreach ($inventories as $index => $inventory)
+        {{-- @foreach ($inventories as $index => $inventory) --}}
             {{-- <div class="w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700" wire:key="input-{{ $index }}" >
                 <div class="grid md:grid-cols-2 md:gap-6">
                     
@@ -28,7 +28,7 @@
                         id="name"
                         label="Name"
                         type="text"
-                        wire:model="inventories.{{ $index }}.name"
+                        wire:model="inventories.name"
                     />
                     <x-form.floating-input
                         id="code"
@@ -88,11 +88,11 @@
                         Remove
                 </button>
             </div> --}}
-            <div class="flex flex-col items-center p-5 bg-white border border-gray-200 rounded-lg shadow-sm md:flex-row md:max-full dark:border-gray-700 dark:bg-gray-800" wire:key="input-{{ $index }}">
+            <div class="flex flex-col items-center p-5 bg-white border border-gray-200 rounded-lg shadow-sm md:flex-row md:max-full dark:border-gray-700 dark:bg-gray-800 mb-5">
                 <div class="flex items-center justify-center w-80">
-                    <label for="image-{{ $index }}" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                        @if($inventories[$index]['image'])
-                            <img src="{{ $inventories[$index]['image']->temporaryURL() }}" alt="">
+                    <label for="image" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                        @if($inventoryDataToSave['image'])
+                            <img src="{{ $inventoryDataToSave['image']->temporaryURL() }}" alt="">
                         @else
                             <div class="flex flex-col items-center justify-center pt-5 pb-6">
                                 <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
@@ -102,49 +102,96 @@
                                 <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
                             </div>
                         @endif
-                        <input id="image-{{ $index }}" type="file" class="hidden"  wire:model="inventories.{{ $index }}.image"/>
+                        <input id="image" type="file" class="hidden"  wire:model="inventoryDataToSave.image"/>
                     </label>
                 </div> 
                 <div class="flex flex-col justify-between p-4 leading-normal w-full">
-                    <div class="grid md:grid-cols-2 md:gap-6">
-                        
-                        <x-form.floating-input
-                            id="name"
-                            label="Name"
-                            type="text"
-                            wire:model="inventories.{{ $index }}.name"
-                        />
-                        <x-form.floating-input
-                            id="code"
-                            label="Code"
-                            type="text"
-                            wire:model="inventories.{{ $index }}.code"
-                        />
-                    </div>
-                    <div class="grid md:grid-cols-2 md:gap-6">
-                        <x-form.floating-input
-                            id="quantity"
-                            label="Quantity"
-                            type="number"
-                            wire:model="inventories.{{ $index }}.quantity"
-                        />
-                        <div class="relative z-0 w-full mb-5 group">
-                            <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="inventories.{{ $index }}.unit_of_measurement_id">
+                    <div class="mb-3">
+                        <h5 class="text-xl font-bold dark:text-white mb-3">Basic Information</h5>
+                        <div class="grid md:grid-cols-2 md:gap-3">
+                            
+                            <x-form.floating-input
+                                id="code"
+                                label="Code"
+                                type="text"
+                                wire:model="inventoryDataToSave.code"
+                            />
     
-                                <option>Unit</option>
-                                @foreach ($units as $unitIndex => $unit)
-                                    <optgroup label="{{ Str::ucfirst($unitIndex) }}">
-                                        @foreach ($unit as $unitData)
-                                            <option value="{{ $unitData->id }}">{{ Str::ucfirst($unitData->name) }}</option>
-                                        @endforeach
-                                    </optgroup>
-                                @endforeach
-                            </select>
+                            <x-form.floating-input
+                                id="name"
+                                label="Name"
+                                type="text"
+                                wire:model="inventoryDataToSave.name"
+                            />
+    
+                            <div class="relative z-0 w-full mb-5 group">
+                                <select id="inventory_unit" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model.live="inventoryDataToSave.inventory_unit_id">
+        
+                                    <option value="">Inventory Unit</option>
+                                    @foreach ($units as $unitIndex => $unit)
+                                        <optgroup label="{{ Str::ucfirst($unitIndex) }}">
+                                            @foreach ($unit as $unitData)
+                                                <option value="{{ $unitData->id }}">{{ Str::ucfirst($unitData->name) }} ({{ $unitData->symbol }})</option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="text-xl font-bold dark:text-white mb-3">Cost Information</h5>
+                        <div class="grid md:grid-cols-2 md:gap-3">
+                            
+                            <x-form.floating-input
+                                id="cost"
+                                label="Unit Cost"
+                                type="number"
+                                wire:model="inventoryDataToSave.cost"
+                            />
+    
+                            <div class="relative z-0 w-full mb-5 group">
+                                <select id="cost_unit" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="inventoryDataToSave.cost_unit_id">
+        
+                                    <option value="">Cost Unit</option>
+                                    @foreach ($filteredUnits as $filteredUnit)
+                                        <option value="{{ $filteredUnit->id }}">{{ Str::ucfirst($filteredUnit->name) }} ({{ $filteredUnit->symbol }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="text-xl font-bold dark:text-white mb-3">Stock Information</h5>
+                        <div class="grid md:grid-cols-2 md:gap-3">
+                            <x-form.floating-input
+                                id="quantity"
+                                label="Initial Quantity"
+                                type="number"
+                                wire:model="inventoryDataToSave.opening_quantity"
+                            />
+                            
+                            <div class="relative z-0 w-full mb-5 group">
+                                <select id="opening_unit" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="inventoryDataToSave.opening_quantity_unit_id">
+        
+                                    <option value="">Initial Quantity Unit</option>
+                                    @foreach ($filteredUnits as $filteredUnit)
+                                        <option value="{{ $filteredUnit->id }}">{{ Str::ucfirst($filteredUnit->name) }} ({{ $filteredUnit->symbol }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            
+                            <x-form.floating-input
+                                id="par_level"
+                                label="Par Level"
+                                type="number"
+                                wire:model="inventoryDataToSave.par_level"
+                            />
                         </div>
                     </div>
                     <div class="relative z-0 w-full mb-5 group">
                         <label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Category</label>
-                        <select id="category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="inventories.{{ $index }}.inventory_category_id">
+                        <select id="category" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="inventoryDataToSave.inventory_category_id">
     
                             <option value="">Select Category</option>
                             @foreach ($categories as $category)
@@ -152,29 +199,15 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="grid md:grid-cols-2 md:gap-6">
-                        <x-form.floating-input
-                            id="price"
-                            label="Price"
-                            type="number"
-                            wire:model="inventories.{{ $index }}.price"
-                        />
-                        <x-form.floating-input
-                            id="par_level"
-                            label="Par Level"
-                            type="number"
-                            wire:model="inventories.{{ $index }}.par_level"
-                        />
-                    </div>
                 </div>
-                <button 
+                {{-- <button 
                     type="button" 
                     wire:click="remove({{ $index }})"
                     class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
                         Remove
-                </button>
+                </button> --}}
             </div>
-        @endforeach
+        {{-- @endforeach --}}
         
 
         <button type="submit" class="w-full mt-5 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>

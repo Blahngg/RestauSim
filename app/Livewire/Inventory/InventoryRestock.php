@@ -37,18 +37,18 @@ class InventoryRestock extends Component
         $match = array_search($id, array_column($this->selectedInventories, 'id'));
 
         if($match === false){
-            $inventoryData = Inventory::with(['unitOfMeasurement'])->findOrFail($id);
+            $inventoryData = Inventory::with(['inventoryUnit', 'costUnit'])->findOrFail($id);
             $this->selectedInventories[] = 
             [
                 'id' => $inventoryData->id,
                 'image' => $inventoryData->image,
                 'name' => $inventoryData->name,
-                'code' => $inventoryData->code,
-                'quantity' =>$inventoryData->quantity,
-                'unit_of_measurement' => $inventoryData->unitOfMeasurement->symbol,
-                'unit_category' => $inventoryData->unitOfMeasurement->category,
+                'cost_per_unit' => $inventoryData->cost_per_unit,
+                'quantity' =>$inventoryData->quantity_on_hand,
+                'unit_of_measurement' => $inventoryData->inventoryUnit->symbol,
+                'unit_category' => $inventoryData->inventoryUnit->category,
                 'addQuantity' => '', 
-                'addUnitOfMeasurement' => $inventoryData->unitOfMeasurement->symbol,
+                'addUnitOfMeasurement' => $inventoryData->inventoryUnit->symbol,
             ]; 
         }
         else{
@@ -70,12 +70,19 @@ class InventoryRestock extends Component
                 $restockQuantity = null;
                 if($inventoryItem['unit_category'] == 'weight'){
                     $restockQuantity = new Mass($inventoryItem['addQuantity'], $inventoryItem['addUnitOfMeasurement']);
+                    $finalQuantity = $restockQuantity->toUnit($inventoryItem['unit_of_measurement']);
                 }
                 elseif($inventoryItem['unit_category'] == 'volume'){
                     $restockQuantity = new Volume($inventoryItem['addQuantity'], $inventoryItem['addUnitOfMeasurement']);
+                    $finalQuantity = $restockQuantity->toUnit($inventoryItem['unit_of_measurement']);
                 }
+                elseif($inventoryItem['unit_category'] == 'count'){
+                    $finalQuantity = $inventoryItem['addQuantity'];
+                }
+
+                // dd($finalQuantity);
     
-                Inventory::findOrFail($inventoryItem['id'])->increment('quantity', $restockQuantity->toUnit($inventoryItem['unit_of_measurement']));
+                Inventory::findOrFail($inventoryItem['id'])->increment('quantity_on_hand', $finalQuantity);
             }
             $this->reset(['selectedInventories']);
             DB::commit();
@@ -92,11 +99,11 @@ class InventoryRestock extends Component
         $categories = InventoryCategory::all();
         $selectedInventories = $this->selectedInventories;
         $inventories = $this->category ? 
-            Inventory::with(['category','unitOfMeasurement'])
+            Inventory::with(['category','inventoryUnit', 'costUnit'])
                 ->where('inventory_category_id', $this->category)
                 ->paginate(10)
             :
-            Inventory::with(['category','unitOfMeasurement'])
+            Inventory::with(['category','inventoryUnit', 'costUnit'])
                 ->paginate(10);
         
         return view('livewire.inventory.inventory-restock')

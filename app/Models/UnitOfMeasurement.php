@@ -11,10 +11,18 @@ class UnitOfMeasurement extends Model
         'symbol'
     ];
 
-    public function inventories(){
+    public function inventoryItems(){
         return $this->hasMany(
             Inventory::class,
-            'unit_of_measurement_id',
+            'inventory_unit_id',
+            'id'
+        );
+    }
+
+    public function costUnitItems(){
+        return $this->hasMany(
+            Inventory::class,
+            'cost_unit_id',
             'id'
         );
     }

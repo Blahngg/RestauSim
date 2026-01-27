@@ -24,7 +24,7 @@
                                 Product
                             </th>
                             <th scope="col" class="px-6 py-3">
-                                Code
+                                Cost
                             </th>
                             <th scope="col" class="px-6 py-3">
                                 Current Stock
@@ -44,13 +44,13 @@
                                     {{ $selected['name'] }}
                                 </td>
                                 <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                                    {{ $selected['code'] }}
+                                    {{ $selected['cost_per_unit'] }}
                                 </td>
                                 <td class="px-6 py-4">
                                     {{ $selected['quantity'] }} {{ $selected['unit_of_measurement'] }}
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="relative z-0 w-full mb-5 group">
+                                    <div class="relative z-0 w-full mb-5 group grid grid-cols-2 gap-6">
                                         <x-form.floating-input
                                             id="quantity"
                                             label="Quantity"

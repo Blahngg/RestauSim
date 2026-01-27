@@ -52,11 +52,11 @@ class InventoryList extends Component
         $active = $this->category;
         $categories = InventoryCategory::all();
         $inventories = $this->category ? 
-            Inventory::with(['category','unitOfMeasurement'])
+            Inventory::with(['category','inventoryUnit', 'costUnit'])
                 ->where('inventory_category_id', $this->category)
                 ->paginate(10)
             :
-            Inventory::with(['category','unitOfMeasurement'])
+            Inventory::with(['category','inventoryUnit', 'costUnit'])
                 ->paginate(10);
 
         return view('livewire.inventory.inventory-list')

@@ -11,7 +11,10 @@ class MenuItemCustomization extends Model
         'ingredient_id', 
         'inventory_id',
         'name',
-        'quantity', 
+        'quantity_used', 
+        'price', 
+        'cost', 
+        'is_vat_exempt', 
         'unit_of_measurement_id',
         'action'
     ];

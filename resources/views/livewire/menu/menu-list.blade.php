@@ -53,7 +53,10 @@
                                 Product
                             </th>
                             <th scope="col" class="px-6 py-3">
-                                Code
+                                Cost
+                            </th>
+                            <th scope="col" class="px-6 py-3">
+                                Price
                             </th>
                             <th scope="col" class="px-6 py-3">
                                 Action
@@ -76,7 +79,10 @@
                                     {{ $menuItem->name }}
                                 </td>
                                 <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                                    {{ $menuItem->code }}
+                                    {{ $menuItem->cost }}
+                                </td>
+                                <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">
+                                    {{ $menuItem->price }}
                                 </td>
                                 <td class="px-6 py-4">
                                     <a href="{{ route('menu.edit', $menuItem) }}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline cursor-pointer pr-5">

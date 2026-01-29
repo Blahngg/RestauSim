@@ -16,7 +16,9 @@ return new class extends Migration
             $table->string('name');
             $table->string('description');
             $table->string('image');
-            $table->float('price');
+            $table->decimal('price', 10, 2);
+            $table->decimal('cost', 10, 2);
+            $table->boolean('is_vat_exempt')->default(false);
             $table->foreignId('menu_item_category_id')->constrained('menu_item_categories');
             $table->timestamps();
         });

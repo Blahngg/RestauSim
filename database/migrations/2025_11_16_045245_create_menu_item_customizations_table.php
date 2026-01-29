@@ -17,7 +17,10 @@ return new class extends Migration
             $table->foreignId('ingredient_id')->nullable()->constrained('ingredients')->onDelete('set null');
             $table->foreignId('inventory_id')->nullable()->constrained('inventories')->onDelete('set null');
             $table->string('name')->nullable();
-            $table->float('quantity')->nullable();
+            $table->decimal('quantity_used', 10, 4)->nullable();
+            $table->decimal('price', 10, 2);
+            $table->decimal('cost', 10, 2);
+            $table->boolean('is_vat_exempt')->default(false);
             $table->foreignId('unit_of_measurement_id')->nullable()->constrained('unit_of_measurements')->onDelete('set null');
             $table->string('action');
             $table->timestamps();

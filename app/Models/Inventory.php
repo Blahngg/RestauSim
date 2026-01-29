@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use PhpUnitsOfMeasure\PhysicalQuantity\Mass;
+use PhpUnitsOfMeasure\PhysicalQuantity\Volume;
 
 class Inventory extends Model
 {
@@ -26,6 +28,27 @@ class Inventory extends Model
     public function getCostPerUnitAttribute(){
         return $this->unit_cost . '/' . $this->costUnit->symbol;
     }
+
+    public function computeCostPerUnit(string $baseUnit, string $unitCategory){
+        if($unitCategory === 'weight'){
+            $mass = new Mass(1, $this->costUnit->symbol);
+            $baseQuantity = $mass->toUnit($baseUnit);
+        }
+        elseif($unitCategory === 'volume'){
+            $mass = new Volume(1, $this->costUnit->symbol);
+            $baseQuantity = $mass->toUnit($baseUnit);
+        }
+        elseif($unitCategory === 'count'){
+            return $this->unit_cost;
+        }
+
+        // dd($this->unit_cost, $baseQuantity, $this->unit_cost/$baseQuantity);
+
+        return (int) $this->unit_cost / $baseQuantity;
+        // return round((int) $this->unit_cost / $baseQuantity, 2);
+    }
+
+    // Relationships
 
     public function category(){
         return $this->belongsTo(

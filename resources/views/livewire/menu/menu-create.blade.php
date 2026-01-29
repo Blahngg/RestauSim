@@ -40,6 +40,29 @@
                             <label for="message" class="block mb-2.5 text-sm font-medium text-heading text-gray-500 dark:text-gray-500">Description</label>
                             <textarea id="message" rows="4" class="dark:bg-gray-800 border border-default-medium text-heading text-sm rounded-xl focus:ring-brand focus:border-brand block w-full p-3.5 shadow-xs placeholder:text-body dark:bg-gray-800 dark:text-white" placeholder="Write your thoughts here..." wire:model="description"></textarea>
                         </div>
+                        <div class="relative z-0 mb-5 group grid grid-cols-2 gap-5">
+                            <x-form.floating-input
+                                id="price"
+                                label="Price"
+                                type="number"
+                                wire:model="price"
+                            />
+
+                            <x-form.floating-input
+                                id="cost"
+                                label="Cost"
+                                type="number"
+                                wire:model="cost"
+                                disabled
+                            /> 
+                        </div>
+                        <div class="relative z-0 w-1/2 mb-5 group">
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" value="true" class="sr-only peer" wire:model="is_vat_exempt">
+                                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"></div>
+                                <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Vat Exempt</span>
+                            </label>
+                        </div>
                         <div class="relative z-0 w-1/2 mb-5 group">
                             <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Category</label>
                             <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="menu_item_category_id">
@@ -49,14 +72,6 @@
                                     <option value="{{ $category->id }}">{{ $category->name }}</option>                                    
                                 @endforeach
                             </select>
-                        </div>
-                        <div class="relative z-0 w-1/2 mb-5 group">
-                            <x-form.floating-input
-                                id="price"
-                                label="Price"
-                                type="number"
-                                wire:model="price"
-                            />
                         </div>
                     </div>
                 </div>
@@ -72,7 +87,7 @@
             </button>
             <ul class="w-full divide-y-8 divide-double">
                 @foreach ($ingredients as $index => $ingredient)
-                    <li class="pb-3 sm:pb-4">
+                    <li class="pb-3 sm:pb-4" wire:key="ingredient-{{ $ingredient['uid'] }}">
                         <div>
                             <h4 class="text-2xl font-bold text-heading dark:text-white my-3">Ingridient {{ $index + 1 }}</h4>
                             <div class="flex items-center space-x-4 rtl:space-x-reverse">
@@ -91,12 +106,12 @@
                                     <label for="removable-{{ $index }}" class="inline-flex items-center mb-5 cursor-pointer">
                                         <input id="removable-{{ $index }}" type="checkbox" wire:model="removableIngredients" value="{{ $ingredient['uid'] }}" class="sr-only peer">
                                         <div class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-soft dark:peer-focus:ring-brand-soft rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-buffer after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-900"></div>
-                                        <span class="select-none ms-3 text-sm font-medium text-heading">Large toggle</span>
+                                        <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Can Remove</span>
                                     </label>
                                 </div>
                                 <div class="inline-flex items-center align-middle text-base font-semibold text-heading">
                                     <div class="flex flex-col items-center align-middle text-gray-400">
-                                        <label for="quantity-input" class="block mb-2.5 text-sm font-medium text-heading">Choose quantity:</label>
+                                        {{-- <label for="quantity-input" class="block mb-2.5 text-sm font-medium text-heading">Choose quantity:</label>
                                         <div class="relative flex items-center max-w-[9rem] shadow-xs rounded-xl">
                                             <button type="button" 
                                                 id="decrement-button" 
@@ -117,7 +132,7 @@
                                                 data-input-counter aria-describedby="helper-text-explanation" 
                                                 class="border-x-0 h-10 placeholder:text-heading text-center w-full dark:bg-gray-800 border-white border-default-medium py-2.5 placeholder:text-body text-white" 
                                                 placeholder=""
-                                                wire:model="ingredients.{{ $index }}.quantity" />
+                                                wire:model="ingredients.{{ $index }}.quantity_used" />
                                             <button type="button" 
                                                 id="increment-button" 
                                                 class="text-body dark:bg-gray-800 box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary font-medium leading-5 rounded-e-xl text-sm px-3 focus:outline-none h-10"
@@ -132,12 +147,14 @@
                                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
                                                     </svg>
                                             </button>
-                                        </div>
+                                        </div> --}}
+                                        <label for="number-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter quantity:</label>
+                                        <input type="number" id="number-input" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:keydown.enter.prevent wire:model.blur="ingredients.{{ $index }}.quantity_used"/>
                                     </div>
                                 </div>
                                 <div class="relative z-0 group">
                                     <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Unit Of Measurement</label>
-                                    <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="ingredients.{{ $index }}.unit_of_measurement_id">
+                                    <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model.change="ingredients.{{ $index }}.unit_of_measurement_id">
                                             
                                         @foreach ($units as $unitIndex => $unit)
                                             @if ($ingredient['unit_category'] == $unitIndex)
@@ -147,6 +164,12 @@
                                             @endif
                                         @endforeach
                                     </select>
+                                </div>
+                                <div class="inline-flex items-center align-middle text-base font-semibold text-heading">
+                                    <div class="flex flex-col items-center align-middle text-gray-400">
+                                        <label for="number-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cost:</label>
+                                        <input type="number" id="number-input" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="ingredients.{{ $index }}.cost" disabled/>
+                                    </div>
                                 </div>
                                 <div class="flex flex-col">
                                     <button type="button" 
@@ -167,7 +190,7 @@
                             <ul class="w-full divide-y divide-default">
                                 @foreach ($alternativeIngredients as $alternativeIndex => $alternativeIngredient)
                                     @if($ingredient['uid'] == $alternativeIngredient['ingredient_uid'])
-                                        <li class="pb-3 sm:pb-4 ml-10">
+                                        <li class="pb-3 sm:pb-4 ml-10" wire:key="alternative-{{ $alternativeIngredient['uid'] }}">
                                             <div class="mt-3">
                                                 <div class="flex items-center space-x-4 rtl:space-x-reverse">
                                                     <div class="shrink-0">
@@ -181,9 +204,41 @@
                                                             {{ $alternativeIngredient['code'] }}
                                                         </p>
                                                     </div>
+                                                    {{-- <div class="inline-flex items-center align-middle text-base font-semibold text-heading">
+                                                        <label for="vat_exempt-{{ $index }}" class="inline-flex items-center mb-5 cursor-pointer">
+                                                            <input id="vat_exempt-{{ $index }}" type="checkbox" wire:model="alternativeIngredients.{{ $index }}.is_vat_exempt" value="{{ $ingredient['uid'] }}" class="sr-only peer">
+                                                            <div class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-soft dark:peer-focus:ring-brand-soft rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-buffer after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-900"></div>
+                                                            <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Vat Exempt</span>
+                                                        </label>
+                                                    </div> --}}
                                                     <div class="inline-flex items-center align-middle text-base font-semibold text-heading">
                                                         <div class="flex flex-col items-center align-middle text-gray-400">
-                                                            <label for="quantity-input" class="block mb-2.5 text-sm font-medium text-heading">Choose quantity:</label>
+                                                            <label for="number-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter quantity:</label>
+                                                            <input type="number" id="number-input" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:keydown.enter.prevent wire:model.blur="alternativeIngredients.{{ $index }}.quantity_used"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="relative z-0 group">
+                                                        <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Unit Of Measurement</label>
+                                                        <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model.change="alternativeIngredients.{{ $alternativeIndex }}.unit_of_measurement_id">
+
+                                                            @foreach ($units as $unitIndex => $unit)
+                                                                @if ($alternativeIngredient['unit_category'] == $unitIndex)
+                                                                    @foreach ($unit as $unitData)
+                                                                        <option value="{{ $unitData->id }}">{{ Str::ucfirst($unitData->name) }}</option>
+                                                                    @endforeach
+                                                                @endif
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="inline-flex items-center align-middle text-base font-semibold text-heading">
+                                                        <div class="flex flex-col items-center align-middle text-gray-400">
+                                                            <label for="number-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cost:</label>
+                                                            <input type="number" id="number-input" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="alternativeIngredients.{{ $index }}.cost" disabled/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="inline-flex items-center align-middle text-base font-semibold text-heading">
+                                                        <div class="flex flex-col items-center align-middle text-gray-400">
+                                                            {{-- <label for="quantity-input" class="block mb-2.5 text-sm font-medium text-heading">Choose quantity:</label>
                                                             <div class="relative flex items-center max-w-[9rem] shadow-xs rounded-xl">
                                                                 <button type="button" 
                                                                     id="decrement-button" 
@@ -197,28 +252,17 @@
                                                                     id="quantity-input" 
                                                                     aria-describedby="helper-text-explanation" 
                                                                     class="border-x-0 h-10 placeholder:text-heading text-center w-full dark:bg-gray-800 border-white border-default-medium py-2.5 placeholder:text-body text-white" 
-                                                                    wire:model="alternativeIngredients.{{ $alternativeIndex }}.quantity"/>
+                                                                    wire:model="alternativeIngredients.{{ $alternativeIndex }}.quantity_used"/>
                                                                 <button type="button" 
                                                                     id="increment-button" 
                                                                     class="text-body dark:bg-gray-800 box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary font-medium leading-5 rounded-e-xl text-sm px-3 focus:outline-none h-10"
                                                                     wire:click="incrementQuantity({{ $alternativeIndex }}, 'alternative')">
                                                                         <svg class="w-4 h-4 text-heading" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/></svg>
                                                                 </button>
-                                                            </div>
+                                                            </div> --}}
+                                                            <label for="number-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter price:</label>
+                                                            <input type="number" id="number-input" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="alternativeIngredients.{{ $index }}.price"/>
                                                         </div>
-                                                    </div>
-                                                    <div class="relative z-0 group">
-                                                        <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Unit Of Measurement</label>
-                                                        <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="alternativeIngredients.{{ $alternativeIndex }}.unit_of_measurement_id">
-
-                                                            @foreach ($units as $unitIndex => $unit)
-                                                                @if ($alternativeIngredient['unit_category'] == $unitIndex)
-                                                                    @foreach ($unit as $unitData)
-                                                                        <option value="{{ $unitData->id }}">{{ Str::ucfirst($unitData->name) }}</option>
-                                                                    @endforeach
-                                                                @endif
-                                                            @endforeach
-                                                        </select>
                                                     </div>
                                                     <div class="flex flex-col">
                                                         <button type="button" 
@@ -248,7 +292,7 @@
             </button>
             <ul class="w-full divide-y-8 divide-double">
                 @foreach ($additionalIngredients as $additionalIndex => $additionalIngredient)
-                    <li class="pb-3 sm:pb-4">
+                    <li class="pb-3 sm:pb-4" wire:key="additonal-{{ $additionalIngredient['uid'] }}">
                         <div>
                             <h4 class="text-2xl font-bold text-heading dark:text-white my-3">Ingridient {{ $additionalIndex + 1 }}</h4>
                             <div class="flex items-center space-x-4 rtl:space-x-reverse">
@@ -263,50 +307,22 @@
                                         {{ $additionalIngredient['code'] }}
                                     </p>
                                 </div>
+                                {{-- <div class="inline-flex items-center align-middle text-base font-semibold text-heading">
+                                    <label for="vat_exempt-{{ $additionalIndex }}" class="inline-flex items-center mb-5 cursor-pointer">
+                                        <input id="vat_exempt-{{ $additionalIndex }}" type="checkbox" wire:model="additionalIngredients.{{ $additionalIndex }}.is_vat_exempt" value="{{ $additionalIngredient['uid'] }}" class="sr-only peer">
+                                        <div class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-soft dark:peer-focus:ring-brand-soft rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-buffer after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-900"></div>
+                                        <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Vat Exempt</span>
+                                    </label>
+                                </div> --}}
                                 <div class="inline-flex items-center align-middle text-base font-semibold text-heading">
                                     <div class="flex flex-col items-center align-middle text-gray-400">
-                                        <label for="quantity-input" class="block mb-2.5 text-sm font-medium text-heading">Choose quantity:</label>
-                                        <div class="relative flex items-center max-w-[9rem] shadow-xs rounded-xl">
-                                            <button type="button" 
-                                                id="decrement-button" 
-                                                class="text-body dark:bg-gray-800 box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary font-medium leading-5 rounded-s-xl text-sm px-3 focus:outline-none h-10"
-                                                wire:click="decrementQuantity({{ $additionalIndex }}, 'additional')">
-                                                    <svg class="w-4 h-4 text-heading" 
-                                                        aria-hidden="true" 
-                                                        xmlns="http://www.w3.org/2000/svg" 
-                                                        width="24" 
-                                                        height="24" 
-                                                        fill="none" 
-                                                        viewBox="0 0 24 24">
-                                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"/>
-                                                    </svg>
-                                            </button>
-                                            <input type="text" 
-                                                id="quantity-input" 
-                                                data-input-counter aria-describedby="helper-text-explanation" 
-                                                class="border-x-0 h-10 placeholder:text-heading text-center w-full dark:bg-gray-800 border-white border-default-medium py-2.5 placeholder:text-body text-white" 
-                                                placeholder=""
-                                                wire:model="additionalIngredients.{{ $additionalIndex }}.quantity" />
-                                            <button type="button" 
-                                                id="increment-button" 
-                                                class="text-body dark:bg-gray-800 box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary font-medium leading-5 rounded-e-xl text-sm px-3 focus:outline-none h-10"
-                                                wire:click="incrementQuantity({{ $additionalIndex }}, 'additional')">
-                                                    <svg class="w-4 h-4 text-heading" 
-                                                        aria-hidden="true" 
-                                                        xmlns="http://www.w3.org/2000/svg" 
-                                                        width="24" 
-                                                        height="24" 
-                                                        fill="none" 
-                                                        viewBox="0 0 24 24">
-                                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-                                                    </svg>
-                                            </button>
-                                        </div>
+                                        <label for="number-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter quantity:</label>
+                                        <input type="number" id="number-input" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:keydown.enter.prevent wire:model.blur="additionalIngredients.{{ $additionalIndex }}.quantity_used"/>
                                     </div>
                                 </div>
                                 <div class="relative z-0 group">
                                     <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Unit Of Measurement</label>
-                                    <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="additionalIngredients.{{ $additionalIndex }}.unit_of_measurement_id">
+                                    <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model.change="additionalIngredients.{{ $additionalIndex }}.unit_of_measurement_id">
                                             
                                         @foreach ($units as $unitIndex => $unit)
                                             @if ($additionalIngredient['unit_category'] == $unitIndex)
@@ -316,6 +332,18 @@
                                             @endif
                                         @endforeach
                                     </select>
+                                </div>
+                                <div class="inline-flex items-center align-middle text-base font-semibold text-heading">
+                                    <div class="flex flex-col items-center align-middle text-gray-400">
+                                        <label for="number-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cost:</label>
+                                        <input type="number" id="number-input" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="additionalIngredients.{{ $additionalIndex }}.cost" disabled/>
+                                    </div>
+                                </div>
+                                <div class="inline-flex items-center align-middle text-base font-semibold text-heading">
+                                    <div class="flex flex-col items-center align-middle text-gray-400">
+                                        <label for="number-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter price:</label>
+                                        <input type="number" id="number-input" aria-describedby="helper-text-explanation" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" wire:model="additionalIngredients.{{ $additionalIndex }}.price"/>
+                                    </div>
                                 </div>
                                 <div class="flex flex-col">
                                     <button type="button" 
@@ -381,7 +409,7 @@
                                 </li>
                             @endforeach
                         </ul>
-                        <div class="flex mb-2">
+                        <div class="mb-2 grid grid-cols-7 gap-3">
                             @foreach ($inventories as $inventory)
                                 <div class="mr-3 cursor-pointer" 
                                     wire:key="inventory-{{ $inventory->id }}"

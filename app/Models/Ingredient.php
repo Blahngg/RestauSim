@@ -9,7 +9,7 @@ class Ingredient extends Model
     protected $fillable = [
         'menu_item_id',
         'inventory_id',
-        'quantity',
+        'quantity_used',
         'unit_of_measurement_id',
     ];
 

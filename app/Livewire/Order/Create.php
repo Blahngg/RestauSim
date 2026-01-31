@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use ParagonIE\Sodium\Core\Curve25519\Ge\P2;
 
 #[Layout('layouts.app')]
 class Create extends Component
@@ -23,15 +24,21 @@ class Create extends Component
     public $order;
     public $category;
     public $table;
+    public $menuItems;
     public $customizations;
     public $showCustomizationModal = false;
+    public $showDiscountModal = false;
     public $menu;
     public $ordersToAdd = [];
     public $orders = [];
     public $orderCount = 0;
+    // public $itemDiscount = [];
     public function mount(Table $table){
         $this->table = $table;
         $this->customizations = MenuItemCustomization::with(['ingredient', 'inventory', 'unitOfMeasurement'])->get();
+        $this->menuItems = MenuItem::with(['category','ingredients', 'customizations'])->get();
+
+        // dd($this->customizations);
 
         //Search for existing orders
         $orders = Order::with(['items'])->where('table_id', $this->table->id)->limit(2)->get();
@@ -41,30 +48,41 @@ class Create extends Component
             foreach($this->order->items as $item){
                 if($item->status !== 'cancelled'){
                     $customizations = [];
+                    $totalPrice = (int) $item->item->price;
                     // get existing customizations
                     foreach($item->customizations as $customization){
                         if($item->id === $customization->item_order_id){
                             $customizations[] = [
                                 'id' => $customization->customization->id,
                                 'name' => $customization->customization->inventory->name ?? 'No ' . $customization->customization->ingredient->inventory->name,
-                                'quantity' => $customization->quantity
+                                'quantity' => $customization->customization->quantity_used,
+                                'price' => $customization->customization->price,
                             ];
+                            $totalPrice += (int) $customization->customization->price;
                         }
                     }
+
+                    $computedPrice = $customization->customization->quantity_used * $totalPrice;
     
                     $this->orders[] = [
                         'uid' => $item->id,
                         'menu_item_id' => $item->menu_item_id,
                         'menu_name' => $item->item->name,
                         'customizations' => $customizations, 
-                        'quantity' =>  $item->quantity
+                        'quantity' =>  $item->quantity,
+                        'base_price' => $totalPrice,
+                        'price' => $computedPrice,
                     ];
                 }
             }
         }
         elseif($orders->isEmpty()){
             $this->order = Order::create([
-                'table_id' => $this->table->id
+                'table_id' => $this->table->id,
+                'subtotal_amount' => 0,
+                'total_discount_amount' => 0,
+                'total_vat_amount' => 0,
+                'total_amount' => 0,
             ]);
         }
         else{
@@ -97,8 +115,25 @@ class Create extends Component
         $this->reset(['ordersToAdd', 'menu']);
         $this->showCustomizationModal = false;
     }
+    public function incrementAdditionalIngredient($index){
+        ++$this->ordersToAdd['additionalIngredients'][$index];
+    }
+    public function decrementAdditionalIngredient($index){
+        if($this->ordersToAdd['additionalIngredients'][$index] > 0){
+            --$this->ordersToAdd['additionalIngredients'][$index];
+        }
+    }
+    public function incrementOrderQuantity(){
+        ++$this->ordersToAdd['quantity'];
+    }
+    public function decrementOrderQuantity(){
+        if($this->ordersToAdd['quantity'] > 1){
+            --$this->ordersToAdd['quantity'];
+        }
+    }
     public function addToOrders(){
         $customizationsArray = [];
+        $totalPrice = (int) $this->menu->price;
         foreach($this->ordersToAdd['ingredients'] as $key => $orderIngredients){
             if($orderIngredients !== 'default'){
                 foreach($this->customizations as $custom){
@@ -106,15 +141,19 @@ class Create extends Component
                         $customizationsArray[] = [
                             'id' => $orderIngredients,
                             'name' => $custom->inventory->name,
-                            'quantity' => 0
+                            'quantity' => 0,
+                            'price' => $custom->price,
                         ];
+                        $totalPrice += (int) $custom->price;
                     }
                     elseif($custom->id == $orderIngredients && $custom->action == 'remove'){
                         $customizationsArray[] = [
                             'id' => $orderIngredients,
                             'name' => 'No ' . $custom->ingredient->inventory->name,
-                            'quantity' => 0
+                            'quantity' => 0,
+                            'price' => $custom->price,
                         ];
+                        $totalPrice += (int) $custom->price;
                     }
                 }
             }
@@ -126,18 +165,25 @@ class Create extends Component
                         $customizationsArray[] = [
                             'id' => $key,
                             'name' => $custom->inventory->name,
-                            'quantity' => $additional
+                            'quantity' => $additional,
+                            'price' => (int) $custom->price,
                         ];
+                        $totalPrice += $custom->price * $additional;
                     }
                 }
             }
         }
+
+        $computedPrice = $this->ordersToAdd['quantity'] * $totalPrice;
+
         $this->orders[] = [
             'uid' => (string) Str::uuid(),
             'menu_item_id' => $this->menu->id,
             'menu_name' => $this->menu->name,
             'customizations' => $customizationsArray, 
-            'quantity' => $this->ordersToAdd['quantity']
+            'quantity' => $this->ordersToAdd['quantity'],
+            'base_price' => $totalPrice,
+            'price' => $computedPrice,
         ];
 
         $this->reset(['ordersToAdd', 'menu']);
@@ -163,7 +209,13 @@ class Create extends Component
                         'order_id' => $order->id,
                         'menu_item_id' => $itemOrder['menu_item_id'],
                         'status' => 'pending',
-                        'quantity' => $itemOrder['quantity']
+                        'quantity_ordered' => $itemOrder['quantity'],
+                        'price_at_sale' => $itemOrder['base_price'],
+                        'vat_rate' => 12,
+                        'vat_removed_amount' => 0,
+                        'discount_percentage' => 0,
+                        'discount_amount' => 0,
+                        'net_amount' => 0,
                     ]);
                     $existingIds[] = $ItemOrder->id;
                     // create item order customizations ( for loop)
@@ -171,7 +223,7 @@ class Create extends Component
                         ItemOrderCustomization::create([
                             'item_order_id' => $ItemOrder->id,
                             'menu_item_customization_id' => $customization['id'],
-                            'quantity' => $customization['quantity'] ?: 1
+                            'quantity_ordered' => $customization['quantity'] ?: 1
                         ]);
                     }
 
@@ -182,7 +234,7 @@ class Create extends Component
                             // menu item name
                             'item:id,name',
                             // item order customizations
-                            'customizations:id,item_order_id,menu_item_customization_id,quantity',
+                            'customizations:id,item_order_id,menu_item_customization_id,quantity_ordered',
                             // menu customizations
                             'customizations.customization:id,ingredient_id,inventory_id,action',
                             // inventory
@@ -233,3 +285,13 @@ class Create extends Component
     // add price computation for saved orders
     //
 }
+
+// public function openDiscountModal($index){
+
+//     $this->itemDiscount['name'] = $this->orders[$index]['menu_name'];
+//     $this->itemDiscount['base_price'] = $this->orders[$index]['base_price'];
+//     $this->showDiscountModal = true;
+// }
+// public function closeDiscountModal(){
+//     $this->showDiscountModal = false;
+// }

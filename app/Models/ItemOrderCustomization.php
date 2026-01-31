@@ -9,7 +9,7 @@ class ItemOrderCustomization extends Model
     protected $fillable = [
         'item_order_id',
         'menu_item_customization_id',
-        'quantity',
+        'quantity_ordered',
     ];
 
     public function item(){

@@ -10,7 +10,16 @@ class ItemOrder extends Model
         'order_id', 
         'menu_item_id', 
         'status',
-        'quantity', 
+        'quantity_ordered', 
+        'price_at_sale', 
+        'vat_rate', 
+        'vat_removed_amount', 
+        'discount_type', 
+        'discount_percentage', 
+        'discount_amount', 
+        'vat_exempted_due_to_discount', 
+        'net_amount', 
+        'notes', 
     ];
 
     public function order(){

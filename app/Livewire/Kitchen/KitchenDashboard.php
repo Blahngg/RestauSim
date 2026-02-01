@@ -22,7 +22,7 @@ class KitchenDashboard extends Component
     public $itemOrders;
     public $uom;
     public function mount(){
-        $tables = Table::all();
+        $tables = Table::where('floor_plan_id', 3)->get();
         $orders = Order::with('items', 'table')->get();
         $this->inventory = Inventory::with(['inventoryUnit', 'costUnit'])->get();
         $this->itemOrders = ItemOrder::with(['item.ingredients', 'customizations', 'customizations.customization'])->get();

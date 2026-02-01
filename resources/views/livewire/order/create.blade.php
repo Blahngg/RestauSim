@@ -46,7 +46,7 @@
             <div class="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800 grid grid-rows-[1fr_5fr_3fr]">
                 {{-- HEAD --}}
                 <div class="pt-3 pl-3 border-b border-gray-200 dark:border-gray-700">
-                    <h5 class="text-xl font-bold dark:text-white">Table 1</h5>
+                    <h5 class="text-xl font-bold dark:text-white">{{ $table->table_code }}</h5>
                 </div>
                 {{-- CURRENT ORDERS --}}
                 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">

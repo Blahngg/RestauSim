@@ -2,9 +2,14 @@
 
 namespace App\Livewire\Kitchen;
 
+use App\Models\Inventory;
 use App\Models\ItemOrder;
+use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\Table;
+use App\Models\UnitOfMeasurement;
+use Exception;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -13,9 +18,15 @@ use Livewire\Component;
 class KitchenDashboard extends Component
 {
     public $orders = [];
+    public $inventory;
+    public $itemOrders;
+    public $uom;
     public function mount(){
         $tables = Table::all();
         $orders = Order::with('items', 'table')->get();
+        $this->inventory = Inventory::with(['inventoryUnit', 'costUnit'])->get();
+        $this->itemOrders = ItemOrder::with(['item.ingredients', 'customizations', 'customizations.customization'])->get();
+        $this->uom = UnitOfMeasurement::all();
         foreach($tables as $table){
             $this->orders[$table['table_code']] = [];
             foreach($orders as $order){
@@ -86,6 +97,77 @@ class KitchenDashboard extends Component
     }
     public function updateStatus($itemOrder, $status, $table, $index){
         if($status == 'pending'){
+            $item = $this->itemOrders->find($this->orders[$table][$index]['item_id']);
+
+            $ingredientsToDeduct = [];
+            $customizationsToDeduct = [];
+
+            foreach($item->item->ingredients as $ingredient){
+                $ingredientsToDeduct[] = [
+                    'ingredient_id' => $ingredient->id,
+                    'inventory_id' => $ingredient->inventory_id,
+                    'quantity_used' => $ingredient->quantity_used,
+                    'unit_of_measurement' => $ingredient->unit_of_measurement_id,
+                ];
+            }
+
+            foreach($item->customizations as $custom){
+                $customizationsToDeduct[] = [
+                    'ingredient_id' => $custom->customization->ingredient_id ?? null,
+                    'inventory_id' => $custom->customization->inventory_id ?? null,
+                    'quantity_used' => $custom->customization->quantity_used * $custom->quantity_ordered ?? 0,
+                    'unit_of_measurement' => $custom->customization->unit_of_measurement_id ?? null
+                ];
+            }
+
+            $customizationsIngredientIds = array_column($customizationsToDeduct, 'ingredient_id');
+
+            $filteredIngredients = array_filter($ingredientsToDeduct, function ($item) use ($customizationsIngredientIds) {
+                return !in_array($item['ingredient_id'], $customizationsIngredientIds);
+            });
+
+            $filteredIngredients = array_values($filteredIngredients);
+
+            // dd($ingredientsToDeduct, $customizationsToDeduct, $filteredIngredients);
+
+            foreach($customizationsToDeduct as $customDeduct){
+                if($customDeduct['quantity_used'] > 0){
+                    DB::beginTransaction();
+                    try{
+                        $inventoryToDeduct = Inventory::lockForUpdate()->find($customDeduct['inventory_id']);
+                        $unitOfMeasurement = $this->uom->find($customDeduct['unit_of_measurement']);
+
+                        $inventoryToDeduct->deductQuantityOnHand(
+                            $customDeduct['quantity_used'], 
+                            $unitOfMeasurement->symbol, 
+                            $unitOfMeasurement->category
+                        );
+                        DB::commit();
+                    }catch(Exception $e){
+                        DB::rollBack();
+                    }
+                }
+            }
+
+            foreach($filteredIngredients as $ingredientDeduct){
+                if($ingredientDeduct['quantity_used'] > 0){
+                    DB::beginTransaction();
+                    try{
+                        $inventoryToDeduct = Inventory::lockForUpdate()->find($ingredientDeduct['inventory_id']);
+                        $unitOfMeasurement = $this->uom->find($ingredientDeduct['unit_of_measurement']);
+
+                        $inventoryToDeduct->deductQuantityOnHand(
+                            $ingredientDeduct['quantity_used'], 
+                            $unitOfMeasurement->symbol, 
+                            $unitOfMeasurement->category
+                        );
+                        DB::commit();
+                    }catch(Exception $e){
+                        DB::rollBack();
+                    }
+                }
+            }
+
             ItemOrder::findOrFail($itemOrder)->update(['status' => 'preparing']);
             $this->orders[$table][$index]['status'] = 'preparing';
         }

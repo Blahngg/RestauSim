@@ -48,6 +48,26 @@ class Inventory extends Model
         // return round((int) $this->unit_cost / $baseQuantity, 2);
     }
 
+    public function deductQuantityOnHand($quantity, $symbol, $category){
+        if($category === 'weight'){
+            $qtyToDeduct = new Mass($quantity, $symbol);
+            $finalQtyToDeduct = $qtyToDeduct->toUnit($this->inventoryUnit->symbol);
+        }
+        elseif($category === 'volume'){
+            $qtyToDeduct = new Volume($quantity, $symbol);
+            $finalQtyToDeduct = $qtyToDeduct->toUnit($this->inventoryUnit->symbol);
+        }
+        elseif($category === 'count'){
+            $finalQtyToDeduct = $quantity;
+        }
+
+        if($this->quantity_on_hand < $finalQtyToDeduct){
+            throw new \DomainException('Insufficient stock');
+        }
+
+        $this->decrement('quantity_on_hand', $finalQtyToDeduct);
+    }
+
     // Relationships
 
     public function category(){
